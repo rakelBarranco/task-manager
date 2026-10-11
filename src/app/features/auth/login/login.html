@@ -1,0 +1,37 @@
+<div class="min-h-screen flex items-center justify-center p-6">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()"
+        class="w-full max-w-sm flex flex-col gap-4 p-8 rounded-xl border border-gray-200">
+    <h1 class="text-2xl font-semibold">Iniciar sesión</h1>
+
+    <label class="flex flex-col gap-1.5 text-sm">
+      <span>Email</span>
+      <input type="email" formControlName="email" placeholder="tu@email.com"
+             class="px-3 py-2.5 rounded-lg border border-gray-300 text-base outline-none focus:border-gray-900" />
+      @if (email?.invalid && email?.touched) {
+        <small class="text-red-600 text-xs">Introduce un email válido.</small>
+      }
+    </label>
+
+    <label class="flex flex-col gap-1.5 text-sm">
+      <span>Contraseña</span>
+      <input type="password" formControlName="password" placeholder="••••••"
+             class="px-3 py-2.5 rounded-lg border border-gray-300 text-base outline-none focus:border-gray-900" />
+      @if (password?.invalid && password?.touched) {
+        <small class="text-red-600 text-xs">Mínimo 6 caracteres.</small>
+      }
+    </label>
+
+    @if (error()) {
+      <p class="px-3 py-2.5 rounded-lg bg-red-50 text-red-700 text-sm">{{ error() }}</p>
+    }
+
+    <button type="submit" [disabled]="loading()"
+            class="py-2.5 rounded-lg bg-gray-900 text-white text-base disabled:opacity-60 disabled:cursor-not-allowed">
+      {{ loading() ? 'Entrando...' : 'Entrar' }}
+    </button>
+
+    <p class="text-center text-sm">
+      ¿No tienes cuenta? <a routerLink="/register" class="underline">Regístrate</a>
+    </p>
+  </form>
+</div>
