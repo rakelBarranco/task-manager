@@ -1,7 +1,102 @@
-<div class="min-h-screen flex flex-col items-center justify-center gap-4 p-6">
-  <h1 class="text-2xl font-semibold">Mis tareas</h1>
-  <p class="text-gray-600">Sesión iniciada como <strong>{{ user()?.email }}</strong></p>
-  <button (click)="logout()" class="px-4 py-2 rounded-lg bg-gray-900 text-white">
-    Cerrar sesión
-  </button>
+<div class="min-h-screen max-w-3xl mx-auto p-6 flex flex-col gap-6">
+
+  <header class="flex items-center justify-between">
+    <h1 class="text-2xl font-semibold">Mis tareas</h1>
+    <div class="flex items-center gap-3 text-sm">
+      <span class="text-gray-600">{{ user()?.email }}</span>
+      <button (click)="logout()" class="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-100">Salir</button>
+    </div>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-3 p-4 rounded-xl border border-gray-200">
+    <input type="text" formControlName="title" placeholder="¿Qué tienes que hacer?"
+           class="px-3 py-2.5 rounded-lg border border-gray-300 outline-none focus:border-gray-900" />
+
+    <textarea formControlName="description" rows="2" placeholder="Descripción (opcional)"
+              class="px-3 py-2.5 rounded-lg border border-gray-300 outline-none focus:border-gray-900 resize-none"></textarea>
+
+    <div class="flex flex-col sm:flex-row gap-3">
+      <select formControlName="priority"
+              class="px-3 py-2.5 rounded-lg border border-gray-300 outline-none focus:border-gray-900">
+        <option value="low">Prioridad baja</option>
+        <option value="medium">Prioridad media</option>
+        <option value="high">Prioridad alta</option>
+      </select>
+
+      <input type="date" formControlName="due_date"
+             class="px-3 py-2.5 rounded-lg border border-gray-300 outline-none focus:border-gray-900" />
+
+      <button type="submit" class="px-4 py-2.5 rounded-lg bg-gray-900 text-white sm:ml-auto">
+        {{ editingId() ? 'Guardar cambios' : 'Añadir tarea' }}
+      </button>
+
+      @if (editingId()) {
+        <button type="button" (click)="cancelEdit()" class="px-4 py-2.5 rounded-lg border border-gray-300">Cancelar</button>
+      }
+    </div>
+  </form>
+
+  <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+    <input type="text" [value]="search()" (input)="search.set($any($event.target).value)"
+           placeholder="Buscar..."
+           class="flex-1 px-3 py-2 rounded-lg border border-gray-300 outline-none focus:border-gray-900" />
+
+    <div class="flex gap-1">
+      <button (click)="filter.set('all')"
+              [class.bg-gray-900]="filter() === 'all'" [class.text-white]="filter() === 'all'"
+              class="px-3 py-2 rounded-lg border border-gray-300 text-sm">Todas</button>
+      <button (click)="filter.set('pending')"
+              [class.bg-gray-900]="filter() === 'pending'" [class.text-white]="filter() === 'pending'"
+              class="px-3 py-2 rounded-lg border border-gray-300 text-sm">Pendientes</button>
+      <button (click)="filter.set('completed')"
+              [class.bg-gray-900]="filter() === 'completed'" [class.text-white]="filter() === 'completed'"
+              class="px-3 py-2 rounded-lg border border-gray-300 text-sm">Completadas</button>
+    </div>
+  </div>
+
+  <p class="text-sm text-gray-500">
+    {{ pendingCount() }} pendientes · {{ completedCount() }} completadas
+  </p>
+
+  @if (loading() && tasks().length === 0) {
+    <p class="text-gray-500">Cargando...</p>
+  } @else if (visibleTasks().length === 0) {
+    <p class="text-gray-500">No hay tareas que mostrar.</p>
+  } @else {
+    <ul class="flex flex-col gap-2">
+      @for (task of visibleTasks(); track task.id) {
+        <li class="flex items-start gap-3 p-4 rounded-xl border border-gray-200" [class.opacity-60]="task.completed">
+          <input type="checkbox" [checked]="task.completed" (change)="toggle(task)" class="mt-1 w-5 h-5 cursor-pointer" />
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-medium" [class.line-through]="task.completed">{{ task.title }}</span>
+
+              <span class="text-xs px-2 py-0.5 rounded-full"
+                    [class.bg-green-100]="task.priority === 'low'" [class.text-green-700]="task.priority === 'low'"
+                    [class.bg-amber-100]="task.priority === 'medium'" [class.text-amber-700]="task.priority === 'medium'"
+                    [class.bg-red-100]="task.priority === 'high'" [class.text-red-700]="task.priority === 'high'">
+                {{ priorityLabel(task.priority) }}
+              </span>
+
+              @if (task.due_date) {
+                <span class="text-xs" [class.text-red-600]="isOverdue(task)" [class.text-gray-500]="!isOverdue(task)">
+                  Vence: {{ task.due_date }}@if (isOverdue(task)) { · vencida }
+                </span>
+              }
+            </div>
+
+            @if (task.description) {
+              <p class="text-sm text-gray-600 mt-1">{{ task.description }}</p>
+            }
+          </div>
+
+          <div class="flex gap-2 shrink-0">
+            <button (click)="startEdit(task)" class="text-sm text-gray-500 hover:text-gray-900">Editar</button>
+            <button (click)="remove(task.id)" class="text-sm text-red-500 hover:text-red-700">Borrar</button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
 </div>
