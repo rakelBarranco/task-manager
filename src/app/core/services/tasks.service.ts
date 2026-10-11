@@ -1,0 +1,72 @@
+import { Injectable, inject, signal } from '@angular/core';
+import { RealtimeChannel } from '@supabase/supabase-js';
+import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
+import { Task, NewTask } from '../models/task.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TasksService {
+  private supabase = inject(SupabaseService).client;
+  private auth = inject(AuthService);
+
+  tasks = signal<Task[]>([]);
+  loading = signal(false);
+
+  async load() {
+    this.loading.set(true);
+    const { data, error } = await this.supabase
+      .from('tasks')
+      .select('*')
+      .order('created_at', { ascending: false });
+    this.loading.set(false);
+
+    if (!error && data) {
+      this.tasks.set(data as Task[]);
+    }
+  }
+
+  async add(task: NewTask) {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    const { error } = await this.supabase
+      .from('tasks')
+      .insert({ ...task, user_id: userId });
+
+    if (error) throw error;
+    await this.load();
+  }
+
+  async update(id: string, changes: Partial<Task>) {
+    const { error } = await this.supabase
+      .from('tasks')
+      .update(changes)
+      .eq('id', id);
+
+    if (error) throw error;
+    await this.load();
+  }
+
+  async toggle(task: Task) {
+    await this.update(task.id, { completed: !task.completed });
+  }
+
+  async remove(id: string) {
+    const { error } = await this.supabase.from('tasks').delete().eq('id', id);
+    if (error) throw error;
+    await this.load();
+  }
+
+  subscribeRealtime(): RealtimeChannel {
+    return this.supabase
+      .channel('tasks-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks' },
+        () => this.load()
+      )
+      .subscribe();
+  }
+}
