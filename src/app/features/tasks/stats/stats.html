@@ -1,0 +1,102 @@
+@if (total() === 0) {
+  <div class="text-center py-16 rounded-2xl border"
+       [style.background]="'var(--surface)'" [style.border-color]="'var(--line)'">
+    <p class="font-medium mb-1" [style.color]="'var(--ink)'">Aún no hay datos 📊</p>
+    <p class="text-sm" [style.color]="'var(--muted)'">Crea algunas tareas para ver tus estadísticas.</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-4">
+
+    <!-- Tarjetas -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="rounded-2xl border p-4" [style.background]="'var(--surface)'" [style.border-color]="'var(--line)'">
+        <p class="text-2xl font-semibold" [style.color]="'var(--ink)'">{{ total() }}</p>
+        <p class="text-xs mt-0.5" [style.color]="'var(--muted)'">Total</p>
+      </div>
+      <div class="rounded-2xl border p-4" [style.background]="'var(--surface)'" [style.border-color]="'var(--line)'">
+        <p class="text-2xl font-semibold" [style.color]="'var(--ink)'">{{ completed() }}</p>
+        <p class="text-xs mt-0.5" [style.color]="'var(--muted)'">Completadas</p>
+      </div>
+      <div class="rounded-2xl border p-4" [style.background]="'var(--surface)'" [style.border-color]="'var(--line)'">
+        <p class="text-2xl font-semibold" [style.color]="'var(--ink)'">{{ pending() }}</p>
+        <p class="text-xs mt-0.5" [style.color]="'var(--muted)'">Pendientes</p>
+      </div>
+      <div class="rounded-2xl border p-4" [style.background]="'var(--surface)'" [style.border-color]="'var(--line)'">
+        <p class="text-2xl font-semibold" [style.color]="'var(--accent)'">{{ percent() }}%</p>
+        <p class="text-xs mt-0.5" [style.color]="'var(--muted)'">Progreso</p>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+
+      <!-- Donut prioridades -->
+      <div class="rounded-2xl border p-5" [style.background]="'var(--surface)'" [style.border-color]="'var(--line)'">
+        <h3 class="text-sm font-semibold mb-4" [style.color]="'var(--ink)'">Por prioridad</h3>
+        <div class="flex items-center gap-6">
+          <div class="relative shrink-0">
+            <svg width="120" height="120" viewBox="0 0 100 100" class="-rotate-90">
+              <circle cx="50" cy="50" r="42" fill="none" [attr.stroke]="'var(--line)'" stroke-width="12" />
+              @for (s of donut().segs; track s.label) {
+                <circle cx="50" cy="50" r="42" fill="none"
+                        [attr.stroke]="s.color" stroke-width="12"
+                        [attr.stroke-dasharray]="s.dash"
+                        [attr.stroke-dashoffset]="s.offset" />
+              }
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span class="text-xl font-semibold" [style.color]="'var(--ink)'">{{ total() }}</span>
+              <span class="text-[10px]" [style.color]="'var(--muted)'">tareas</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2 text-sm flex-1">
+            @for (s of donut().segs; track s.label) {
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" [style.background]="s.color"></span>
+                <span [style.color]="'var(--ink)'">{{ s.label }}</span>
+                <span class="ml-auto font-medium" [style.color]="'var(--muted)'">{{ s.value }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Barras por estado -->
+      <div class="rounded-2xl border p-5" [style.background]="'var(--surface)'" [style.border-color]="'var(--line)'">
+        <h3 class="text-sm font-semibold mb-4" [style.color]="'var(--ink)'">Por estado</h3>
+        <div class="flex flex-col gap-4">
+          <div>
+            <div class="flex justify-between text-sm mb-1.5">
+              <span [style.color]="'var(--ink)'">Por hacer</span>
+              <span [style.color]="'var(--muted)'">{{ byStatus().todo }}</span>
+            </div>
+            <div class="h-2.5 rounded-full overflow-hidden" [style.background]="'var(--bg)'">
+              <div class="h-full rounded-full transition-all duration-500"
+                   [style.width.%]="pct(byStatus().todo)" [style.background]="'#9a9ca6'"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1.5">
+              <span [style.color]="'var(--ink)'">En progreso</span>
+              <span [style.color]="'var(--muted)'">{{ byStatus().doing }}</span>
+            </div>
+            <div class="h-2.5 rounded-full overflow-hidden" [style.background]="'var(--bg)'">
+              <div class="h-full rounded-full transition-all duration-500"
+                   [style.width.%]="pct(byStatus().doing)" [style.background]="'var(--accent)'"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1.5">
+              <span [style.color]="'var(--ink)'">Hecho</span>
+              <span [style.color]="'var(--muted)'">{{ byStatus().done }}</span>
+            </div>
+            <div class="h-2.5 rounded-full overflow-hidden" [style.background]="'var(--bg)'">
+              <div class="h-full rounded-full transition-all duration-500"
+                   [style.width.%]="pct(byStatus().done)" [style.background]="'#1f9c66'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}

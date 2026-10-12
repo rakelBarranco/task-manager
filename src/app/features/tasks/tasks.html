@@ -92,6 +92,9 @@
         <button (click)="view.set('calendar')" class="px-4 py-1.5 rounded-md text-sm transition"
                 [style.background]="view() === 'calendar' ? 'var(--accent)' : 'transparent'"
                 [style.color]="view() === 'calendar' ? 'var(--on-accent)' : 'var(--muted)'">Calendario</button>
+        <button (click)="view.set('stats')" class="px-4 py-1.5 rounded-md text-sm transition"
+                [style.background]="view() === 'stats' ? 'var(--accent)' : 'transparent'"
+                [style.color]="view() === 'stats' ? 'var(--on-accent)' : 'var(--muted)'">Resumen</button>
       </div>
 
       @if (view() === 'list') {
@@ -187,8 +190,10 @@
         }
       } @else if (view() === 'board') {
         <app-board (editTask)="onEditFromBoard($event)" (deleteTask)="askDelete($event)" />
-      } @else {
+      } @else if (view() === 'calendar') {
         <app-calendar (addOnDay)="onAddOnDay($event)" />
+      } @else {
+        <app-stats />
       }
 
     </main>

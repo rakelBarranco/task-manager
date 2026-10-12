@@ -13,12 +13,13 @@ import { Task, Priority } from '../../core/models/task.model';
 import {ToastService} from '../../core/services/toast.service';
 import {Board} from './board/board';
 import { Calendar } from './calendar/calendar';
+import { Stats } from './stats/stats';
 
 type Filter = 'all' | 'pending' | 'completed';
 
 @Component({
   selector: 'app-tasks',
-  imports: [ReactiveFormsModule, LucideAngularModule, Board, Calendar],
+  imports: [ReactiveFormsModule, LucideAngularModule, Board, Calendar, Stats],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss',
 })
@@ -55,7 +56,7 @@ export default class Tasks implements OnInit, OnDestroy {
   search = signal('');
   editingId = signal<string | null>(null);
   pendingDelete = signal<Task | null>(null);
-  view = signal<'list' | 'board' | 'calendar'>('list');
+  view = signal<'list' | 'board' | 'calendar' | 'stats'>('list');
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(2)]],
