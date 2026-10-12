@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
-import { Task, NewTask } from '../models/task.model';
+import {Task, NewTask, TaskStatus} from '../models/task.model';
 
 @Injectable({
   providedIn: 'root'
@@ -60,7 +60,18 @@ export class TasksService {
   }
 
   async toggle(task: Task) {
-    await this.update(task.id, { completed: !task.completed });
+    const completed = !task.completed;
+    const status: TaskStatus = completed ? 'done' : 'todo';
+    const prev = this.tasks();
+    this.tasks.update(list =>
+      list.map(t => (t.id === task.id ? { ...t, completed, status } : t))
+    );
+    const { error } = await this.supabase
+      .from('tasks')
+      .update({ completed, status })
+      .eq('id', task.id);
+    if (error) this.tasks.set(prev);
+    return { error };
   }
 
   async remove(id: string) {
@@ -83,5 +94,19 @@ export class TasksService {
         () => this.load()
       )
       .subscribe();
+  }
+
+  async setStatus(task: Task, status: TaskStatus) {
+    const completed = status === 'done';
+    const prev = this.tasks();
+    this.tasks.update(list =>
+      list.map(t => (t.id === task.id ? { ...t, status, completed } : t))
+    );
+    const { error } = await this.supabase
+      .from('tasks')
+      .update({ status, completed })
+      .eq('id', task.id);
+    if (error) this.tasks.set(prev);
+    return { error };
   }
 }
