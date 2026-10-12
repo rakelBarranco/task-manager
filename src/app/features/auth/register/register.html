@@ -12,6 +12,15 @@
     </div>
 
     <label class="flex flex-col gap-1.5 text-sm text-[var(--muted)]">
+      Nombre
+      <input type="text" formControlName="name" placeholder="Tu nombre"
+             class="px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--line)] text-base text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)] transition" />
+      @if (name?.invalid && name?.touched) {
+        <small class="text-[#e2504a] text-xs">Introduce tu nombre.</small>
+      }
+    </label>
+
+    <label class="flex flex-col gap-1.5 text-sm text-[var(--muted)]">
       Email
       <input type="email" formControlName="email" placeholder="tu@email.com"
              class="px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--line)] text-base text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)] transition" />

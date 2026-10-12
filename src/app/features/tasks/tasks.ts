@@ -4,12 +4,13 @@ import { Router } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import {
   LucideAngularModule,
-  Sun, Moon, LogOut, Plus, Search, Pencil, Trash2, Check, CalendarDays
+  Sun, Moon, LogOut, Plus, Search, Pencil, Trash2, Check, CalendarDays, ClipboardList
 } from 'lucide-angular';
 import { AuthService } from '../../core/services/auth.service';
 import { TasksService } from '../../core/services/tasks.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { Task, Priority } from '../../core/models/task.model';
+import {ToastService} from '../../core/services/toast.service';
 
 type Filter = 'all' | 'pending' | 'completed';
 
@@ -25,6 +26,7 @@ export default class Tasks implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private router = inject(Router);
   theme = inject(ThemeService);
+  private toast = inject(ToastService);
 
   readonly Sun = Sun;
   readonly Moon = Moon;
@@ -35,16 +37,19 @@ export default class Tasks implements OnInit, OnDestroy {
   readonly Trash2 = Trash2;
   readonly Check = Check;
   readonly CalendarDays = CalendarDays;
+  readonly ClipboardList = ClipboardList;
 
   private channel?: RealtimeChannel;
 
   user = this.auth.user;
   tasks = this.tasksService.tasks;
   loading = this.tasksService.loading;
+  displayName = this.auth.displayName;
 
   filter = signal<Filter>('all');
   search = signal('');
   editingId = signal<string | null>(null);
+  pendingDelete = signal<Task | null>(null);
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(2)]],
@@ -105,8 +110,10 @@ export default class Tasks implements OnInit, OnDestroy {
     if (id) {
       await this.tasksService.update(id, payload);
       this.editingId.set(null);
+      this.toast.success('Tarea actualizada');
     } else {
       await this.tasksService.add(payload);
+      this.toast.success('Tarea creada');
     }
 
     this.form.reset({ priority: 'medium' });
@@ -129,10 +136,6 @@ export default class Tasks implements OnInit, OnDestroy {
 
   async toggle(task: Task) {
     await this.tasksService.toggle(task);
-  }
-
-  async remove(id: string) {
-    await this.tasksService.remove(id);
   }
 
   async logout() {
@@ -165,4 +168,17 @@ export default class Tasks implements OnInit, OnDestroy {
     const [y, m, day] = d.split('-');
     return `${day}/${m}/${y}`;
   }
+
+  askDelete(task: Task) { this.pendingDelete.set(task); }
+  cancelDelete() { this.pendingDelete.set(null); }
+
+  async confirmDelete() {
+    const task = this.pendingDelete();
+    if (!task) return;
+    this.pendingDelete.set(null);
+    await this.tasksService.remove(task.id);
+    this.toast.success('Tarea eliminada');
+  }
+
+
 }

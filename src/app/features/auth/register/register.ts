@@ -24,10 +24,12 @@ export default class Register {
   error = signal<string | null>(null);
 
   form = this.fb.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
+  get name() { return this.form.get('name'); }
   get email() { return this.form.get('email'); }
   get password() { return this.form.get('password'); }
 
@@ -40,8 +42,8 @@ export default class Register {
     this.loading.set(true);
     this.error.set(null);
 
-    const { email, password } = this.form.getRawValue();
-    const { error } = await this.auth.signUp(email!, password!);
+    const { name, email, password } = this.form.getRawValue();
+    const { error } = await this.auth.signUp(email!, password!, name!);
 
     this.loading.set(false);
 

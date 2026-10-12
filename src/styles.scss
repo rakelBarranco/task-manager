@@ -25,3 +25,39 @@ body {
   background: var(--bg);
   color: var(--ink);
 }
+
+.toast-in {
+  animation: toast-in 0.25s ease-out;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-in {
+  animation: modal-in 0.2s ease-out;
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.task-item {
+  animation: task-in 0.22s ease-out;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.task-item:hover {
+  transform: translateY(-1px);
+}
+@keyframes task-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.empty-in {
+  animation: empty-in 0.3s ease-out;
+}
+@keyframes empty-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
+}

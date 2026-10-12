@@ -3,7 +3,7 @@
   <header class="flex items-start justify-between mb-8">
     <div>
       <h1 class="text-2xl font-semibold tracking-tight text-[var(--ink)]">Mis tareas</h1>
-      <p class="text-sm text-[var(--muted)] mt-0.5">{{ user()?.email }}</p>
+      <p class="text-sm text-[var(--muted)] mt-0.5">Hola, {{ displayName() }}</p>
     </div>
     <div class="flex items-center gap-2">
       <button (click)="theme.toggle()" aria-label="Cambiar tema"
@@ -105,15 +105,10 @@
 
       @if (loading() && tasks().length === 0) {
         <p class="text-center text-sm text-[var(--muted)] py-10">Cargando...</p>
-      } @else if (visibleTasks().length === 0) {
-        <div class="text-center py-14 bg-[var(--surface)] border border-[var(--line)] rounded-2xl">
-          <p class="text-[var(--ink)] font-medium">No hay tareas que mostrar</p>
-          <p class="text-sm text-[var(--muted)] mt-1">Añade una a la izquierda para empezar.</p>
-        </div>
       } @else {
         <ul class="flex flex-col gap-2">
           @for (task of visibleTasks(); track task.id) {
-            <li class="group bg-[var(--surface)] border border-[var(--line)] rounded-xl p-4 flex items-start gap-3 transition"
+            <li class="task-item group bg-[var(--surface)] border border-[var(--line)] rounded-xl p-4 flex items-start gap-3"
                 [class.opacity-60]="task.completed">
               <button (click)="toggle(task)" aria-label="Completar tarea"
                       class="mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition"
@@ -153,15 +148,56 @@
                         class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--bg)] transition">
                   <lucide-icon [img]="Pencil" [size]="15"></lucide-icon>
                 </button>
-                <button (click)="remove(task.id)" aria-label="Borrar tarea"
+                <button (click)="askDelete(task)" aria-label="Borrar tarea"
                         class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--muted)] hover:text-[#e2504a] hover:bg-[var(--bg)] transition">
                   <lucide-icon [img]="Trash2" [size]="15"></lucide-icon>
                 </button>
               </div>
             </li>
+          } @empty {
+            <div class="flex flex-col items-center justify-center text-center py-16 px-6 empty-in">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+                   [style.background]="'var(--surface)'" [style.border]="'1px solid var(--line)'">
+                <lucide-icon [img]="ClipboardList" [size]="28" [style.color]="'var(--muted)'"></lucide-icon>
+              </div>
+              @if (search() || filter() !== 'all') {
+                <p class="font-medium mb-1" [style.color]="'var(--ink)'">Sin resultados</p>
+                <p class="text-sm" [style.color]="'var(--muted)'">Prueba a cambiar el filtro o la búsqueda.</p>
+              } @else {
+                <p class="font-medium mb-1" [style.color]="'var(--ink)'">Todo despejado ✨</p>
+                <p class="text-sm" [style.color]="'var(--muted)'">Crea tu primera tarea con el formulario de la izquierda.</p>
+              }
+            </div>
           }
         </ul>
       }
     </main>
   </div>
+
+  <!-- Modal de confirmación de borrado -->
+  @if (pendingDelete(); as task) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         style="background: rgba(0,0,0,0.5);">
+      <div class="w-full max-w-sm rounded-2xl border p-6 modal-in"
+           [style.background]="'var(--surface)'"
+           [style.border-color]="'var(--line)'">
+        <h3 class="text-lg font-semibold mb-1" [style.color]="'var(--ink)'">¿Eliminar tarea?</h3>
+        <p class="text-sm mb-5" [style.color]="'var(--muted)'">
+          Se eliminará «{{ task.title }}». Esta acción no se puede deshacer.
+        </p>
+        <div class="flex justify-end gap-2">
+          <button (click)="cancelDelete()"
+                  class="px-4 py-2 rounded-lg text-sm border hover:opacity-80"
+                  [style.color]="'var(--ink)'" [style.border-color]="'var(--line)'">
+            Cancelar
+          </button>
+          <button (click)="confirmDelete()"
+                  class="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90"
+                  style="background: #ef4444;">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>
