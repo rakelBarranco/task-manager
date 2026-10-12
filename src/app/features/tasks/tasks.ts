@@ -11,12 +11,13 @@ import { TasksService } from '../../core/services/tasks.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { Task, Priority } from '../../core/models/task.model';
 import {ToastService} from '../../core/services/toast.service';
+import {Board} from './board/board';
 
 type Filter = 'all' | 'pending' | 'completed';
 
 @Component({
   selector: 'app-tasks',
-  imports: [ReactiveFormsModule, LucideAngularModule],
+  imports: [ReactiveFormsModule, LucideAngularModule, Board],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss',
 })
@@ -50,6 +51,7 @@ export default class Tasks implements OnInit, OnDestroy {
   search = signal('');
   editingId = signal<string | null>(null);
   pendingDelete = signal<Task | null>(null);
+  view = signal<'list' | 'board'>('list');
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(2)]],
@@ -180,5 +182,9 @@ export default class Tasks implements OnInit, OnDestroy {
     this.toast.success('Tarea eliminada');
   }
 
+  onEditFromBoard(task: Task) {
+    this.view.set('list');
+    this.startEdit(task);
+  }
 
 }
