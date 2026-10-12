@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, computed, inject, signal, OnInit, OnDestroy, viewChild, ElementRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
@@ -12,16 +12,20 @@ import { ThemeService } from '../../core/services/theme.service';
 import { Task, Priority } from '../../core/models/task.model';
 import {ToastService} from '../../core/services/toast.service';
 import {Board} from './board/board';
+import { Calendar } from './calendar/calendar';
 
 type Filter = 'all' | 'pending' | 'completed';
 
 @Component({
   selector: 'app-tasks',
-  imports: [ReactiveFormsModule, LucideAngularModule, Board],
+  imports: [ReactiveFormsModule, LucideAngularModule, Board, Calendar],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss',
 })
 export default class Tasks implements OnInit, OnDestroy {
+
+  titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
+
   private fb = inject(FormBuilder);
   private tasksService = inject(TasksService);
   private auth = inject(AuthService);
@@ -51,7 +55,7 @@ export default class Tasks implements OnInit, OnDestroy {
   search = signal('');
   editingId = signal<string | null>(null);
   pendingDelete = signal<Task | null>(null);
-  view = signal<'list' | 'board'>('list');
+  view = signal<'list' | 'board' | 'calendar'>('list');
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(2)]],
@@ -185,6 +189,13 @@ export default class Tasks implements OnInit, OnDestroy {
   onEditFromBoard(task: Task) {
     this.view.set('list');
     this.startEdit(task);
+  }
+
+  onAddOnDay(date: string) {
+    this.editingId.set(null);
+    this.form.reset({ priority: 'medium' });
+    this.form.patchValue({ due_date: date });
+    setTimeout(() => this.titleInput()?.nativeElement.focus(), 0);
   }
 
 }

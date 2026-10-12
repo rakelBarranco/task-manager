@@ -1,0 +1,65 @@
+<div class="rounded-2xl border p-4"
+     [style.background]="'var(--surface)'" [style.border-color]="'var(--line)'">
+
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-base font-semibold" [style.color]="'var(--ink)'">{{ monthLabel() }}</h3>
+    <div class="flex items-center gap-1">
+      <button (click)="goToday()"
+              class="px-3 py-1.5 rounded-lg text-xs border hover:bg-[var(--bg)] transition"
+              [style.color]="'var(--ink)'" [style.border-color]="'var(--line)'">Hoy</button>
+      <button (click)="prevMonth()" aria-label="Mes anterior"
+              class="w-8 h-8 flex items-center justify-center rounded-lg border hover:bg-[var(--bg)] transition"
+              [style.color]="'var(--ink)'" [style.border-color]="'var(--line)'">
+        <lucide-icon [img]="ChevronLeft" [size]="16"></lucide-icon>
+      </button>
+      <button (click)="nextMonth()" aria-label="Mes siguiente"
+              class="w-8 h-8 flex items-center justify-center rounded-lg border hover:bg-[var(--bg)] transition"
+              [style.color]="'var(--ink)'" [style.border-color]="'var(--line)'">
+        <lucide-icon [img]="ChevronRight" [size]="16"></lucide-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-7 gap-1 mb-1">
+    @for (wd of weekDays; track wd) {
+      <div class="text-center text-[11px] font-medium py-1" [style.color]="'var(--muted)'">{{ wd }}</div>
+    }
+  </div>
+
+  <div class="grid grid-cols-7 gap-1">
+    @for (cell of cells(); track cell.date) {
+      <div cdkDropList [id]="cell.date"
+           [cdkDropListData]="tasksForDay(cell.date)"
+           [cdkDropListConnectedTo]="dayListIds()"
+           (cdkDropListDropped)="drop($event, cell.date)"
+           class="group min-h-[88px] rounded-lg border p-1.5 flex flex-col gap-1 transition"
+           [style.background]="cell.inMonth ? 'var(--bg)' : 'transparent'"
+           [style.border-color]="cell.isToday ? 'var(--accent)' : 'var(--line)'"
+           [style.opacity]="cell.inMonth ? '1' : '0.4'">
+
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-medium px-0.5"
+        [style.color]="cell.isToday ? 'var(--accent)' : 'var(--muted)'">{{ cell.day }}</span>
+          @if (cell.inMonth) {
+            <button (click)="addOnDay.emit(cell.date)" aria-label="Añadir tarea este día"
+                    class="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center rounded hover:bg-[var(--surface)] transition"
+                    [style.color]="'var(--muted)'">
+              <lucide-icon [img]="Plus" [size]="12"></lucide-icon>
+            </button>
+          }
+        </div>
+
+        @for (task of tasksForDay(cell.date); track task.id) {
+          <div cdkDrag [cdkDragData]="task"
+               class="cal-chip rounded-md px-1.5 py-1 text-[11px] leading-tight flex items-center gap-1 cursor-grab active:cursor-grabbing"
+               [style.background]="'var(--surface)'"
+               [style.border]="'1px solid var(--line)'"
+               [class.line-through]="task.completed">
+            <span class="w-1.5 h-1.5 rounded-full shrink-0" [style.background]="priorityDot(task.priority)"></span>
+            <span class="truncate" [style.color]="'var(--ink)'">{{ task.title }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

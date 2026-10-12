@@ -109,4 +109,17 @@ export class TasksService {
     if (error) this.tasks.set(prev);
     return { error };
   }
+
+  async setDueDate(task: Task, due_date: string | null) {
+    const prev = this.tasks();
+    this.tasks.update(list =>
+      list.map(t => (t.id === task.id ? { ...t, due_date } : t))
+    );
+    const { error } = await this.supabase
+      .from('tasks')
+      .update({ due_date })
+      .eq('id', task.id);
+    if (error) this.tasks.set(prev);
+    return { error };
+  }
 }
