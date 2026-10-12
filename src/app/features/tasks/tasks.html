@@ -22,7 +22,7 @@
     <aside class="flex flex-col gap-3 lg:sticky lg:top-10">
       <form [formGroup]="form" (ngSubmit)="onSubmit()"
             class="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-4 flex flex-col gap-3">
-        <input type="text" formControlName="title" placeholder="¿Qué tienes que hacer?"
+        <input #titleInput type="text" formControlName="title" placeholder="¿Qué tienes que hacer?"
                class="w-full px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--line)] text-[15px] text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)] transition" />
 
         <textarea formControlName="description" rows="2" placeholder="Descripción (opcional)"
@@ -89,6 +89,9 @@
         <button (click)="view.set('board')" class="px-4 py-1.5 rounded-md text-sm transition"
                 [style.background]="view() === 'board' ? 'var(--accent)' : 'transparent'"
                 [style.color]="view() === 'board' ? 'var(--on-accent)' : 'var(--muted)'">Tablero</button>
+        <button (click)="view.set('calendar')" class="px-4 py-1.5 rounded-md text-sm transition"
+                [style.background]="view() === 'calendar' ? 'var(--accent)' : 'transparent'"
+                [style.color]="view() === 'calendar' ? 'var(--on-accent)' : 'var(--muted)'">Calendario</button>
       </div>
 
       @if (view() === 'list') {
@@ -182,9 +185,12 @@
             }
           </ul>
         }
-      } @else {
+      } @else if (view() === 'board') {
         <app-board (editTask)="onEditFromBoard($event)" (deleteTask)="askDelete($event)" />
+      } @else {
+        <app-calendar (addOnDay)="onAddOnDay($event)" />
       }
+
     </main>
   </div>
 
