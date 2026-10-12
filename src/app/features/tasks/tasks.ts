@@ -2,15 +2,20 @@ import { Component, computed, inject, signal, OnInit, OnDestroy } from '@angular
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import {
+  LucideAngularModule,
+  Sun, Moon, LogOut, Plus, Search, Pencil, Trash2, Check, CalendarDays
+} from 'lucide-angular';
 import { AuthService } from '../../core/services/auth.service';
 import { TasksService } from '../../core/services/tasks.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { Task, Priority } from '../../core/models/task.model';
 
 type Filter = 'all' | 'pending' | 'completed';
 
 @Component({
   selector: 'app-tasks',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, LucideAngularModule],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss',
 })
@@ -19,6 +24,17 @@ export default class Tasks implements OnInit, OnDestroy {
   private tasksService = inject(TasksService);
   private auth = inject(AuthService);
   private router = inject(Router);
+  theme = inject(ThemeService);
+
+  readonly Sun = Sun;
+  readonly Moon = Moon;
+  readonly LogOut = LogOut;
+  readonly Plus = Plus;
+  readonly Search = Search;
+  readonly Pencil = Pencil;
+  readonly Trash2 = Trash2;
+  readonly Check = Check;
+  readonly CalendarDays = CalendarDays;
 
   private channel?: RealtimeChannel;
 
@@ -36,6 +52,10 @@ export default class Tasks implements OnInit, OnDestroy {
     priority: ['medium' as Priority, Validators.required],
     due_date: ['']
   });
+
+  get currentPriority(): Priority {
+    return this.form.controls.priority.value as Priority;
+  }
 
   visibleTasks = computed(() => {
     const term = this.search().trim().toLowerCase();
@@ -61,6 +81,10 @@ export default class Tasks implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.channel?.unsubscribe();
+  }
+
+  setPriority(p: Priority) {
+    this.form.patchValue({ priority: p });
   }
 
   async onSubmit() {
@@ -125,5 +149,20 @@ export default class Tasks implements OnInit, OnDestroy {
 
   priorityLabel(p: Priority): string {
     return p === 'low' ? 'Baja' : p === 'medium' ? 'Media' : 'Alta';
+  }
+
+  priorityBg(p: Priority): string {
+    return p === 'high' ? 'rgba(226,80,74,0.14)'
+      : p === 'medium' ? 'rgba(201,138,18,0.16)'
+        : 'rgba(31,156,102,0.16)';
+  }
+
+  priorityText(p: Priority): string {
+    return p === 'high' ? '#e2504a' : p === 'medium' ? '#c98a12' : '#1f9c66';
+  }
+
+  formatDate(d: string): string {
+    const [y, m, day] = d.split('-');
+    return `${day}/${m}/${y}`;
   }
 }

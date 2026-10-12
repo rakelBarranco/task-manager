@@ -1,1 +1,27 @@
 @use "tailwindcss";
+
+
+:root {
+  --bg: #fbfbfa;
+  --surface: #ffffff;
+  --line: #ececec;
+  --ink: #1a1a1a;
+  --muted: #7a7a7a;
+  --accent: #5b5bd6;
+  --on-accent: #ffffff;
+}
+
+.dark {
+  --bg: #16171d;
+  --surface: #1c1e26;
+  --line: #262830;
+  --ink: #f2f2f0;
+  --muted: #9a9ca6;
+  --accent: #c4f042;
+  --on-accent: #16171d;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}

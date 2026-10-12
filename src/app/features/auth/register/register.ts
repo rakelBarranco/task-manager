@@ -2,10 +2,12 @@ import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import {ThemeService} from '../../../core/services/theme.service';
+import {LucideAngularModule, Sun, Moon} from 'lucide-angular';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, LucideAngularModule],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
@@ -13,6 +15,10 @@ export default class Register {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  theme = inject(ThemeService);
+
+  readonly Sun = Sun;
+  readonly Moon = Moon;
 
   loading = signal(false);
   error = signal<string | null>(null);
