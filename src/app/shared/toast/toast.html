@@ -1,0 +1,22 @@
+<div class="fixed bottom-5 right-5 z-[60] flex flex-col gap-2 w-80 max-w-[calc(100vw-2.5rem)]">
+  @for (t of toasts(); track t.id) {
+    <div
+      class="flex items-start gap-3 rounded-xl border border-l-4 px-4 py-3 shadow-lg toast-in"
+      [style.background]="'var(--surface)'"
+      [style.border-color]="'var(--line)'"
+      [style.border-left-color]="t.type === 'success' ? '#10b981' : t.type === 'error' ? '#ef4444' : '#0ea5e9'">
+      <lucide-icon
+        [img]="icons[t.type]"
+        class="shrink-0 mt-0.5"
+        [class.text-emerald-500]="t.type === 'success'"
+        [class.text-red-500]="t.type === 'error'"
+        [class.text-sky-500]="t.type === 'info'"
+        [size]="18">
+      </lucide-icon>
+      <p class="flex-1 text-sm" [style.color]="'var(--ink)'">{{ t.message }}</p>
+      <button (click)="dismiss(t.id)" class="shrink-0 hover:opacity-70" [style.color]="'var(--muted)'">
+        <lucide-icon [img]="closeIcon" [size]="16"></lucide-icon>
+      </button>
+    </div>
+  }
+</div>

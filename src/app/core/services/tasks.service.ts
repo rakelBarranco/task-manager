@@ -31,22 +31,32 @@ export class TasksService {
     const userId = this.auth.user()?.id;
     if (!userId) return;
 
-    const { error } = await this.supabase
+    const { data, error } = await this.supabase
       .from('tasks')
-      .insert({ ...task, user_id: userId });
+      .insert({ ...task, user_id: userId })
+      .select()
+      .single();
 
     if (error) throw error;
-    await this.load();
+    if (data) {
+      this.tasks.update(list => [data as Task, ...list]);
+    }
   }
 
   async update(id: string, changes: Partial<Task>) {
+    const previous = this.tasks();
+    this.tasks.update(list =>
+      list.map(t => (t.id === id ? { ...t, ...changes } as Task : t))
+    );
+
     const { error } = await this.supabase
       .from('tasks')
       .update(changes)
       .eq('id', id);
 
-    if (error) throw error;
-    await this.load();
+    if (error) {
+      this.tasks.set(previous);
+    }
   }
 
   async toggle(task: Task) {
@@ -54,9 +64,14 @@ export class TasksService {
   }
 
   async remove(id: string) {
+    const previous = this.tasks();
+    this.tasks.update(list => list.filter(t => t.id !== id));
+
     const { error } = await this.supabase.from('tasks').delete().eq('id', id);
-    if (error) throw error;
-    await this.load();
+
+    if (error) {
+      this.tasks.set(previous);
+    }
   }
 
   subscribeRealtime(): RealtimeChannel {

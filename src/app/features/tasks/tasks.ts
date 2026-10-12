@@ -2,15 +2,21 @@ import { Component, computed, inject, signal, OnInit, OnDestroy } from '@angular
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import {
+  LucideAngularModule,
+  Sun, Moon, LogOut, Plus, Search, Pencil, Trash2, Check, CalendarDays, ClipboardList
+} from 'lucide-angular';
 import { AuthService } from '../../core/services/auth.service';
 import { TasksService } from '../../core/services/tasks.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { Task, Priority } from '../../core/models/task.model';
+import {ToastService} from '../../core/services/toast.service';
 
 type Filter = 'all' | 'pending' | 'completed';
 
 @Component({
   selector: 'app-tasks',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, LucideAngularModule],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss',
 })
@@ -19,16 +25,31 @@ export default class Tasks implements OnInit, OnDestroy {
   private tasksService = inject(TasksService);
   private auth = inject(AuthService);
   private router = inject(Router);
+  theme = inject(ThemeService);
+  private toast = inject(ToastService);
+
+  readonly Sun = Sun;
+  readonly Moon = Moon;
+  readonly LogOut = LogOut;
+  readonly Plus = Plus;
+  readonly Search = Search;
+  readonly Pencil = Pencil;
+  readonly Trash2 = Trash2;
+  readonly Check = Check;
+  readonly CalendarDays = CalendarDays;
+  readonly ClipboardList = ClipboardList;
 
   private channel?: RealtimeChannel;
 
   user = this.auth.user;
   tasks = this.tasksService.tasks;
   loading = this.tasksService.loading;
+  displayName = this.auth.displayName;
 
   filter = signal<Filter>('all');
   search = signal('');
   editingId = signal<string | null>(null);
+  pendingDelete = signal<Task | null>(null);
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(2)]],
@@ -36,6 +57,10 @@ export default class Tasks implements OnInit, OnDestroy {
     priority: ['medium' as Priority, Validators.required],
     due_date: ['']
   });
+
+  get currentPriority(): Priority {
+    return this.form.controls.priority.value as Priority;
+  }
 
   visibleTasks = computed(() => {
     const term = this.search().trim().toLowerCase();
@@ -63,6 +88,10 @@ export default class Tasks implements OnInit, OnDestroy {
     this.channel?.unsubscribe();
   }
 
+  setPriority(p: Priority) {
+    this.form.patchValue({ priority: p });
+  }
+
   async onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -81,8 +110,10 @@ export default class Tasks implements OnInit, OnDestroy {
     if (id) {
       await this.tasksService.update(id, payload);
       this.editingId.set(null);
+      this.toast.success('Tarea actualizada');
     } else {
       await this.tasksService.add(payload);
+      this.toast.success('Tarea creada');
     }
 
     this.form.reset({ priority: 'medium' });
@@ -107,10 +138,6 @@ export default class Tasks implements OnInit, OnDestroy {
     await this.tasksService.toggle(task);
   }
 
-  async remove(id: string) {
-    await this.tasksService.remove(id);
-  }
-
   async logout() {
     await this.auth.signOut();
     this.router.navigate(['/login']);
@@ -126,4 +153,32 @@ export default class Tasks implements OnInit, OnDestroy {
   priorityLabel(p: Priority): string {
     return p === 'low' ? 'Baja' : p === 'medium' ? 'Media' : 'Alta';
   }
+
+  priorityBg(p: Priority): string {
+    return p === 'high' ? 'rgba(226,80,74,0.14)'
+      : p === 'medium' ? 'rgba(201,138,18,0.16)'
+        : 'rgba(31,156,102,0.16)';
+  }
+
+  priorityText(p: Priority): string {
+    return p === 'high' ? '#e2504a' : p === 'medium' ? '#c98a12' : '#1f9c66';
+  }
+
+  formatDate(d: string): string {
+    const [y, m, day] = d.split('-');
+    return `${day}/${m}/${y}`;
+  }
+
+  askDelete(task: Task) { this.pendingDelete.set(task); }
+  cancelDelete() { this.pendingDelete.set(null); }
+
+  async confirmDelete() {
+    const task = this.pendingDelete();
+    if (!task) return;
+    this.pendingDelete.set(null);
+    await this.tasksService.remove(task.id);
+    this.toast.success('Tarea eliminada');
+  }
+
+
 }

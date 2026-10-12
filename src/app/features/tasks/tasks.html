@@ -1,102 +1,203 @@
-<div class="min-h-screen max-w-3xl mx-auto p-6 flex flex-col gap-6">
+<div class="max-w-5xl mx-auto px-4 py-8 sm:py-10">
 
-  <header class="flex items-center justify-between">
-    <h1 class="text-2xl font-semibold">Mis tareas</h1>
-    <div class="flex items-center gap-3 text-sm">
-      <span class="text-gray-600">{{ user()?.email }}</span>
-      <button (click)="logout()" class="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-100">Salir</button>
+  <header class="flex items-start justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight text-[var(--ink)]">Mis tareas</h1>
+      <p class="text-sm text-[var(--muted)] mt-0.5">Hola, {{ displayName() }}</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button (click)="theme.toggle()" aria-label="Cambiar tema"
+              class="w-9 h-9 flex items-center justify-center rounded-lg border border-[var(--line)] text-[var(--ink)] hover:bg-[var(--surface)] transition">
+        <lucide-icon [img]="theme.theme() === 'dark' ? Sun : Moon" [size]="18"></lucide-icon>
+      </button>
+      <button (click)="logout()" aria-label="Cerrar sesión"
+              class="w-9 h-9 flex items-center justify-center rounded-lg border border-[var(--line)] text-[var(--ink)] hover:bg-[var(--surface)] transition">
+        <lucide-icon [img]="LogOut" [size]="18"></lucide-icon>
+      </button>
     </div>
   </header>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-3 p-4 rounded-xl border border-gray-200">
-    <input type="text" formControlName="title" placeholder="¿Qué tienes que hacer?"
-           class="px-3 py-2.5 rounded-lg border border-gray-300 outline-none focus:border-gray-900" />
+  <div class="grid lg:grid-cols-[340px_1fr] gap-6 items-start">
 
-    <textarea formControlName="description" rows="2" placeholder="Descripción (opcional)"
-              class="px-3 py-2.5 rounded-lg border border-gray-300 outline-none focus:border-gray-900 resize-none"></textarea>
+    <aside class="flex flex-col gap-3 lg:sticky lg:top-10">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()"
+            class="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-4 flex flex-col gap-3">
+        <input type="text" formControlName="title" placeholder="¿Qué tienes que hacer?"
+               class="w-full px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--line)] text-[15px] text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)] transition" />
 
-    <div class="flex flex-col sm:flex-row gap-3">
-      <select formControlName="priority"
-              class="px-3 py-2.5 rounded-lg border border-gray-300 outline-none focus:border-gray-900">
-        <option value="low">Prioridad baja</option>
-        <option value="medium">Prioridad media</option>
-        <option value="high">Prioridad alta</option>
-      </select>
+        <textarea formControlName="description" rows="2" placeholder="Descripción (opcional)"
+                  class="w-full px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--line)] text-sm text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)] resize-none transition"></textarea>
 
-      <input type="date" formControlName="due_date"
-             class="px-3 py-2.5 rounded-lg border border-gray-300 outline-none focus:border-gray-900" />
+        <div>
+          <p class="text-xs text-[var(--muted)] mb-1.5">Prioridad</p>
+          <div class="flex gap-1.5">
+            <button type="button" (click)="setPriority('low')"
+                    class="flex-1 px-2 py-1.5 rounded-lg text-sm border transition"
+                    [style.background]="currentPriority === 'low' ? priorityBg('low') : 'transparent'"
+                    [style.color]="currentPriority === 'low' ? priorityText('low') : 'var(--muted)'"
+                    [style.borderColor]="currentPriority === 'low' ? priorityText('low') : 'var(--line)'">Baja</button>
+            <button type="button" (click)="setPriority('medium')"
+                    class="flex-1 px-2 py-1.5 rounded-lg text-sm border transition"
+                    [style.background]="currentPriority === 'medium' ? priorityBg('medium') : 'transparent'"
+                    [style.color]="currentPriority === 'medium' ? priorityText('medium') : 'var(--muted)'"
+                    [style.borderColor]="currentPriority === 'medium' ? priorityText('medium') : 'var(--line)'">Media</button>
+            <button type="button" (click)="setPriority('high')"
+                    class="flex-1 px-2 py-1.5 rounded-lg text-sm border transition"
+                    [style.background]="currentPriority === 'high' ? priorityBg('high') : 'transparent'"
+                    [style.color]="currentPriority === 'high' ? priorityText('high') : 'var(--muted)'"
+                    [style.borderColor]="currentPriority === 'high' ? priorityText('high') : 'var(--line)'">Alta</button>
+          </div>
+        </div>
 
-      <button type="submit" class="px-4 py-2.5 rounded-lg bg-gray-900 text-white sm:ml-auto">
-        {{ editingId() ? 'Guardar cambios' : 'Añadir tarea' }}
-      </button>
+        <div>
+          <p class="text-xs text-[var(--muted)] mb-1.5">Fecha límite</p>
+          <input type="date" formControlName="due_date"
+                 class="w-full px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--line)] text-sm text-[var(--ink)] outline-none focus:border-[var(--accent)] transition" />
+        </div>
 
-      @if (editingId()) {
-        <button type="button" (click)="cancelEdit()" class="px-4 py-2.5 rounded-lg border border-gray-300">Cancelar</button>
-      }
-    </div>
-  </form>
+        <div class="flex gap-2 pt-1">
+          @if (editingId()) {
+            <button type="button" (click)="cancelEdit()"
+                    class="px-3 py-2 rounded-lg border border-[var(--line)] text-sm text-[var(--ink)] hover:bg-[var(--bg)] transition">Cancelar</button>
+          }
+          <button type="submit"
+                  class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-[var(--accent)] text-[var(--on-accent)] text-sm font-medium hover:opacity-90 transition">
+            <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+            {{ editingId() ? 'Guardar cambios' : 'Añadir tarea' }}
+          </button>
+        </div>
+      </form>
 
-  <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-    <input type="text" [value]="search()" (input)="search.set($any($event.target).value)"
-           placeholder="Buscar..."
-           class="flex-1 px-3 py-2 rounded-lg border border-gray-300 outline-none focus:border-gray-900" />
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-4">
+          <p class="text-2xl font-semibold text-[var(--ink)]">{{ pendingCount() }}</p>
+          <p class="text-xs text-[var(--muted)] mt-0.5">Pendientes</p>
+        </div>
+        <div class="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-4">
+          <p class="text-2xl font-semibold text-[var(--ink)]">{{ completedCount() }}</p>
+          <p class="text-xs text-[var(--muted)] mt-0.5">Completadas</p>
+        </div>
+      </div>
+    </aside>
 
-    <div class="flex gap-1">
-      <button (click)="filter.set('all')"
-              [class.bg-gray-900]="filter() === 'all'" [class.text-white]="filter() === 'all'"
-              class="px-3 py-2 rounded-lg border border-gray-300 text-sm">Todas</button>
-      <button (click)="filter.set('pending')"
-              [class.bg-gray-900]="filter() === 'pending'" [class.text-white]="filter() === 'pending'"
-              class="px-3 py-2 rounded-lg border border-gray-300 text-sm">Pendientes</button>
-      <button (click)="filter.set('completed')"
-              [class.bg-gray-900]="filter() === 'completed'" [class.text-white]="filter() === 'completed'"
-              class="px-3 py-2 rounded-lg border border-gray-300 text-sm">Completadas</button>
-    </div>
-  </div>
+    <main class="flex flex-col gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div class="relative flex-1">
+          <lucide-icon [img]="Search" [size]="16"
+                       class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"></lucide-icon>
+          <input type="text" [value]="search()" (input)="search.set($any($event.target).value)"
+                 placeholder="Buscar tareas..."
+                 class="w-full pl-10 pr-3 py-2.5 rounded-lg bg-[var(--surface)] border border-[var(--line)] text-sm text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)] transition" />
+        </div>
 
-  <p class="text-sm text-gray-500">
-    {{ pendingCount() }} pendientes · {{ completedCount() }} completadas
-  </p>
+        <div class="flex gap-1 bg-[var(--surface)] border border-[var(--line)] rounded-lg p-1">
+          <button (click)="filter.set('all')" class="px-3 py-1.5 rounded-md text-sm transition"
+                  [style.background]="filter() === 'all' ? 'var(--accent)' : 'transparent'"
+                  [style.color]="filter() === 'all' ? 'var(--on-accent)' : 'var(--muted)'">Todas</button>
+          <button (click)="filter.set('pending')" class="px-3 py-1.5 rounded-md text-sm transition"
+                  [style.background]="filter() === 'pending' ? 'var(--accent)' : 'transparent'"
+                  [style.color]="filter() === 'pending' ? 'var(--on-accent)' : 'var(--muted)'">Pendientes</button>
+          <button (click)="filter.set('completed')" class="px-3 py-1.5 rounded-md text-sm transition"
+                  [style.background]="filter() === 'completed' ? 'var(--accent)' : 'transparent'"
+                  [style.color]="filter() === 'completed' ? 'var(--on-accent)' : 'var(--muted)'">Hechas</button>
+        </div>
+      </div>
 
-  @if (loading() && tasks().length === 0) {
-    <p class="text-gray-500">Cargando...</p>
-  } @else if (visibleTasks().length === 0) {
-    <p class="text-gray-500">No hay tareas que mostrar.</p>
-  } @else {
-    <ul class="flex flex-col gap-2">
-      @for (task of visibleTasks(); track task.id) {
-        <li class="flex items-start gap-3 p-4 rounded-xl border border-gray-200" [class.opacity-60]="task.completed">
-          <input type="checkbox" [checked]="task.completed" (change)="toggle(task)" class="mt-1 w-5 h-5 cursor-pointer" />
+      @if (loading() && tasks().length === 0) {
+        <p class="text-center text-sm text-[var(--muted)] py-10">Cargando...</p>
+      } @else {
+        <ul class="flex flex-col gap-2">
+          @for (task of visibleTasks(); track task.id) {
+            <li class="task-item group bg-[var(--surface)] border border-[var(--line)] rounded-xl p-4 flex items-start gap-3"
+                [class.opacity-60]="task.completed">
+              <button (click)="toggle(task)" aria-label="Completar tarea"
+                      class="mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition"
+                      [style.background]="task.completed ? 'var(--accent)' : 'transparent'"
+                      [style.borderColor]="task.completed ? 'var(--accent)' : 'var(--line)'">
+                @if (task.completed) {
+                  <lucide-icon [img]="Check" [size]="13" [style.color]="'var(--on-accent)'"></lucide-icon>
+                }
+              </button>
 
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-medium" [class.line-through]="task.completed">{{ task.title }}</span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-[15px] text-[var(--ink)]" [class.line-through]="task.completed">{{ task.title }}</span>
 
-              <span class="text-xs px-2 py-0.5 rounded-full"
-                    [class.bg-green-100]="task.priority === 'low'" [class.text-green-700]="task.priority === 'low'"
-                    [class.bg-amber-100]="task.priority === 'medium'" [class.text-amber-700]="task.priority === 'medium'"
-                    [class.bg-red-100]="task.priority === 'high'" [class.text-red-700]="task.priority === 'high'">
-                {{ priorityLabel(task.priority) }}
-              </span>
+                  <span class="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                        [style.background]="priorityBg(task.priority)"
+                        [style.color]="priorityText(task.priority)">
+                    {{ priorityLabel(task.priority) }}
+                  </span>
 
-              @if (task.due_date) {
-                <span class="text-xs" [class.text-red-600]="isOverdue(task)" [class.text-gray-500]="!isOverdue(task)">
-                  Vence: {{ task.due_date }}@if (isOverdue(task)) { · vencida }
-                </span>
+                  @if (task.due_date) {
+                    <span class="inline-flex items-center gap-1 text-[11px]"
+                          [style.color]="isOverdue(task) ? '#e2504a' : 'var(--muted)'">
+                      <lucide-icon [img]="CalendarDays" [size]="12"></lucide-icon>
+                      {{ formatDate(task.due_date) }}@if (isOverdue(task)) { · vencida }
+                    </span>
+                  }
+                </div>
+
+                @if (task.description) {
+                  <p class="text-sm text-[var(--muted)] mt-1">{{ task.description }}</p>
+                }
+              </div>
+
+              <div class="flex gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition">
+                <button (click)="startEdit(task)" aria-label="Editar tarea"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--bg)] transition">
+                  <lucide-icon [img]="Pencil" [size]="15"></lucide-icon>
+                </button>
+                <button (click)="askDelete(task)" aria-label="Borrar tarea"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--muted)] hover:text-[#e2504a] hover:bg-[var(--bg)] transition">
+                  <lucide-icon [img]="Trash2" [size]="15"></lucide-icon>
+                </button>
+              </div>
+            </li>
+          } @empty {
+            <div class="flex flex-col items-center justify-center text-center py-16 px-6 empty-in">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+                   [style.background]="'var(--surface)'" [style.border]="'1px solid var(--line)'">
+                <lucide-icon [img]="ClipboardList" [size]="28" [style.color]="'var(--muted)'"></lucide-icon>
+              </div>
+              @if (search() || filter() !== 'all') {
+                <p class="font-medium mb-1" [style.color]="'var(--ink)'">Sin resultados</p>
+                <p class="text-sm" [style.color]="'var(--muted)'">Prueba a cambiar el filtro o la búsqueda.</p>
+              } @else {
+                <p class="font-medium mb-1" [style.color]="'var(--ink)'">Todo despejado ✨</p>
+                <p class="text-sm" [style.color]="'var(--muted)'">Crea tu primera tarea con el formulario de la izquierda.</p>
               }
             </div>
-
-            @if (task.description) {
-              <p class="text-sm text-gray-600 mt-1">{{ task.description }}</p>
-            }
-          </div>
-
-          <div class="flex gap-2 shrink-0">
-            <button (click)="startEdit(task)" class="text-sm text-gray-500 hover:text-gray-900">Editar</button>
-            <button (click)="remove(task.id)" class="text-sm text-red-500 hover:text-red-700">Borrar</button>
-          </div>
-        </li>
+          }
+        </ul>
       }
-    </ul>
+    </main>
+  </div>
+
+  <!-- Modal de confirmación de borrado -->
+  @if (pendingDelete(); as task) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         style="background: rgba(0,0,0,0.5);">
+      <div class="w-full max-w-sm rounded-2xl border p-6 modal-in"
+           [style.background]="'var(--surface)'"
+           [style.border-color]="'var(--line)'">
+        <h3 class="text-lg font-semibold mb-1" [style.color]="'var(--ink)'">¿Eliminar tarea?</h3>
+        <p class="text-sm mb-5" [style.color]="'var(--muted)'">
+          Se eliminará «{{ task.title }}». Esta acción no se puede deshacer.
+        </p>
+        <div class="flex justify-end gap-2">
+          <button (click)="cancelDelete()"
+                  class="px-4 py-2 rounded-lg text-sm border hover:opacity-80"
+                  [style.color]="'var(--ink)'" [style.border-color]="'var(--line)'">
+            Cancelar
+          </button>
+          <button (click)="confirmDelete()"
+                  class="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90"
+                  style="background: #ef4444;">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
   }
 </div>

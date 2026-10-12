@@ -1,37 +1,54 @@
-<div class="min-h-screen flex items-center justify-center p-6">
-  <form [formGroup]="form" (ngSubmit)="onSubmit()"
-        class="w-full max-w-sm flex flex-col gap-4 p-8 rounded-xl border border-gray-200">
-    <h1 class="text-2xl font-semibold">Crear cuenta</h1>
+<div class="min-h-screen flex items-center justify-center p-6 relative">
+  <button (click)="theme.toggle()" aria-label="Cambiar tema"
+          class="absolute top-5 right-5 w-9 h-9 flex items-center justify-center rounded-lg border border-[var(--line)] text-[var(--ink)] hover:bg-[var(--surface)] transition">
+    <lucide-icon [img]="theme.theme() === 'dark' ? Sun : Moon" [size]="18"></lucide-icon>
+  </button>
 
-    <label class="flex flex-col gap-1.5 text-sm">
-      <span>Email</span>
-      <input type="email" formControlName="email" placeholder="tu@email.com"
-             class="px-3 py-2.5 rounded-lg border border-gray-300 text-base outline-none focus:border-gray-900" />
-      @if (email?.invalid && email?.touched) {
-        <small class="text-red-600 text-xs">Introduce un email válido.</small>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()"
+        class="w-full max-w-sm bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-8 flex flex-col gap-4">
+    <div class="mb-2">
+      <h1 class="text-2xl font-semibold tracking-tight text-[var(--ink)]">Crear cuenta</h1>
+      <p class="text-sm text-[var(--muted)] mt-1">Empieza a organizar tus tareas.</p>
+    </div>
+
+    <label class="flex flex-col gap-1.5 text-sm text-[var(--muted)]">
+      Nombre
+      <input type="text" formControlName="name" placeholder="Tu nombre"
+             class="px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--line)] text-base text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)] transition" />
+      @if (name?.invalid && name?.touched) {
+        <small class="text-[#e2504a] text-xs">Introduce tu nombre.</small>
       }
     </label>
 
-    <label class="flex flex-col gap-1.5 text-sm">
-      <span>Contraseña</span>
+    <label class="flex flex-col gap-1.5 text-sm text-[var(--muted)]">
+      Email
+      <input type="email" formControlName="email" placeholder="tu@email.com"
+             class="px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--line)] text-base text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)] transition" />
+      @if (email?.invalid && email?.touched) {
+        <small class="text-[#e2504a] text-xs">Introduce un email válido.</small>
+      }
+    </label>
+
+    <label class="flex flex-col gap-1.5 text-sm text-[var(--muted)]">
+      Contraseña
       <input type="password" formControlName="password" placeholder="••••••"
-             class="px-3 py-2.5 rounded-lg border border-gray-300 text-base outline-none focus:border-gray-900" />
+             class="px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--line)] text-base text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)] transition" />
       @if (password?.invalid && password?.touched) {
-        <small class="text-red-600 text-xs">Mínimo 6 caracteres.</small>
+        <small class="text-[#e2504a] text-xs">Mínimo 6 caracteres.</small>
       }
     </label>
 
     @if (error()) {
-      <p class="px-3 py-2.5 rounded-lg bg-red-50 text-red-700 text-sm">{{ error() }}</p>
+      <p class="px-3 py-2.5 rounded-lg text-sm" style="background: rgba(226,80,74,0.12); color: #e2504a;">{{ error() }}</p>
     }
 
     <button type="submit" [disabled]="loading()"
-            class="py-2.5 rounded-lg bg-gray-900 text-white text-base disabled:opacity-60 disabled:cursor-not-allowed">
+            class="py-2.5 rounded-lg bg-[var(--accent)] text-[var(--on-accent)] text-[15px] font-medium hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition">
       {{ loading() ? 'Creando...' : 'Crear cuenta' }}
     </button>
 
-    <p class="text-center text-sm">
-      ¿Ya tienes cuenta? <a routerLink="/login" class="underline">Inicia sesión</a>
+    <p class="text-center text-sm text-[var(--muted)]">
+      ¿Ya tienes cuenta? <a routerLink="/login" class="text-[var(--ink)] underline underline-offset-2">Inicia sesión</a>
     </p>
   </form>
 </div>
