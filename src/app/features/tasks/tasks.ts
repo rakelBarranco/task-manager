@@ -14,12 +14,13 @@ import {ToastService} from '../../core/services/toast.service';
 import {Board} from './board/board';
 import { Calendar } from './calendar/calendar';
 import { Stats } from './stats/stats';
+import {DatePicker} from './date-picker/date-picker';
 
 type Filter = 'all' | 'pending' | 'completed';
 
 @Component({
   selector: 'app-tasks',
-  imports: [ReactiveFormsModule, LucideAngularModule, Board, Calendar, Stats],
+  imports: [ReactiveFormsModule, LucideAngularModule, Board, Calendar, Stats, DatePicker],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss',
 })

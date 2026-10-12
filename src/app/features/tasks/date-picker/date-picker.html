@@ -1,0 +1,53 @@
+<div class="relative">
+  <button type="button" (click)="toggle()"
+          class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg border text-sm transition"
+          [style.background]="'var(--bg)'"
+          [style.border-color]="open() ? 'var(--accent)' : 'var(--line)'">
+    <span class="flex items-center gap-2" [style.color]="value() ? 'var(--ink)' : 'var(--muted)'">
+      <lucide-icon [img]="CalendarDays" [size]="15"></lucide-icon>
+      {{ label() }}
+    </span>
+    @if (value()) {
+      <span (click)="clear($event)" class="hover:opacity-70" [style.color]="'var(--muted)'">
+        <lucide-icon [img]="X" [size]="14"></lucide-icon>
+      </span>
+    }
+  </button>
+
+  @if (open()) {
+    <div class="absolute left-0 z-30 mt-2 w-64 rounded-xl border p-3 shadow-lg modal-in"
+         [style.background]="'var(--surface)'" [style.border-color]="'var(--line)'">
+      <div class="flex items-center justify-between mb-2">
+        <button type="button" (click)="prevMonth()"
+                class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[var(--bg)]" [style.color]="'var(--ink)'">
+          <lucide-icon [img]="ChevronLeft" [size]="15"></lucide-icon>
+        </button>
+        <span class="text-sm font-medium" [style.color]="'var(--ink)'">{{ monthLabel() }}</span>
+        <button type="button" (click)="nextMonth()"
+                class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[var(--bg)]" [style.color]="'var(--ink)'">
+          <lucide-icon [img]="ChevronRight" [size]="15"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-7 gap-0.5 mb-1">
+        @for (wd of weekDays; track $index) {
+          <div class="text-center text-[10px] font-medium py-1" [style.color]="'var(--muted)'">{{ wd }}</div>
+        }
+      </div>
+
+      <div class="grid grid-cols-7 gap-0.5">
+        @for (cell of cells(); track cell.date) {
+          <button type="button" (click)="select(cell)"
+                  class="h-8 rounded-md text-xs flex items-center justify-center transition hover:bg-[var(--bg)]"
+                  [style.background]="isSelected(cell.date) ? 'var(--accent)' : null"
+                  [style.color]="isSelected(cell.date) ? 'var(--on-accent)' : (cell.isToday ? 'var(--accent)' : 'var(--ink)')"
+                  [style.border]="cell.isToday && !isSelected(cell.date) ? '1px solid var(--accent)' : null"
+                  [style.opacity]="cell.inMonth ? '1' : '0.4'"
+                  [style.fontWeight]="cell.isToday ? '700' : '400'">
+            {{ cell.day }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>
